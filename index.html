@@ -2,9 +2,84 @@
 <html>
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base target="_top">
     <title>段考成績查詢</title>
+    <style>
+        body {
+            font-family: "DFKai-SB", Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 3.0em;
+            color: #007BFF;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-family: "Microsoft JhengHei", Arial, sans-serif;
+            font-size: 1.3em;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 10px;
+            color: #555;
+        }
+
+        select,
+        input[type="password"] {
+            font-family: "Microsoft JhengHei", Arial, sans-serif;
+            font-size: 1.2em;
+            font-weight: bold;
+            padding: 10px;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 300px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            font-family: "Microsoft JhengHei", Arial, sans-serif;
+            font-size: 1.3em;
+            font-weight: bold;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #5a5a5a;
+        }
+
+        #result {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            font-size: 1.3em;
+        }
+
+       #result p { /* 選取所有 #result 下的 <p> 標籤 */
+            font-family: "Microsoft JhengHei", Arial, sans-serif; /* 中圓體 */
+            font-weight: bold;
+            margin: 10px 0;
+            color: #008000; /* 綠色 */
+        }
+
+        #result p span.number { /* 選取數字部分 */
+            font-family: "Times New Roman", serif; /* 數字使用 Times New Roman */
+            color: #000; /* 黑色 */
+        }
+    </style>
+
 </head>
 
 <body>
@@ -33,6 +108,32 @@
             return data.values || [];
         }
 
+        async function filterData() {
+    const seatNumber = document.getElementById('seatNumber').value;
+    const count = document.getElementById('count').value;
+    const password = document.getElementById('password').value;
+
+    const data = await fetchSheetData();
+    console.log("✅ API 回傳的完整資料：", data);
+
+    if (data.length < 2) {
+        console.log("⚠️ 沒有可用的資料！");
+        return;
+    }
+
+    // 🔹 查詢符合條件的數據
+    const filteredData = data.slice(1).find(row => row[0] === seatNumber && row[1] === count && row[2] === password);
+
+    console.log("🔎 找到的資料：", filteredData);
+
+    if (filteredData) {
+        displayData(filteredData);
+    } else {
+        document.getElementById('result').innerHTML = '<p style="color:red;">查無符合條件的資料。</p>';
+    }
+}
+
+        
         async function loadDropdownOptions() {
             const data = await fetchSheetData();
             if (!data || data.length < 2) return;
@@ -43,7 +144,7 @@
             const seatNumberSelect = document.getElementById('seatNumber');
             const countSelect = document.getElementById('count');
 
-            seatNumberSelect.innerHTML = '<option value="" disabled selected>請選擇座號</option>';
+            seatNumberSelect.innerHTML = '<option value="" disabled selected>請選擇座號及姓名</option>';
             countSelect.innerHTML = '<option value="" disabled selected>請選擇次數</option>';
 
             seatNumbers.forEach(seat => {
@@ -60,7 +161,7 @@
                 countSelect.appendChild(option);
             });
         }
-
+        
         function convertGoogleDriveImageUrl(driveUrl) {
             if (driveUrl.includes("drive.google.com")) {
                 const match = driveUrl.match(/\/d\/(.*)\/view/);
@@ -70,6 +171,32 @@
         }
 
         window.onload = loadDropdownOptions;
+        
+        function displayData(data) {
+    console.log("✅ 顯示的數據：", data);
+
+    const resultDiv = document.getElementById('result');
+
+    // 🔹 確保圖片 URL 正確轉換（適用 Google Drive）
+    const imageUrl = convertGoogleDriveImageUrl(data[15]); // 圖片 URL 位於試算表的第 16 欄
+
+    resultDiv.innerHTML = `
+        <p><span>座號:</span> <span class="number">${data[3]}</span></p>
+        <p><span>姓名:</span> <span class="chinese">${data[4]}</span></p>
+        <p><span>國文:</span> <span class="number">${data[5]}</span></p>
+        <p><span>英文:</span> <span class="number">${data[6]}</span></p>
+        <p><span>數學:</span> <span class="number">${data[7]}</span></p>
+        <p><span>自然:</span> <span class="number">${data[8]}</span></p>
+        <p><span>社會:</span> <span class="number">${data[9]}</span></p>
+        <p><span>總分:</span> <span class="number">${data[10]}</span></p>
+        <p><span>平均:</span> <span class="number">${data[11]}</span></p>
+        <p><span>排名:</span> <span class="number">${data[12]}</span></p>
+        <p><span>上次排名:</span> <span class="number">${data[13]}</span></p>
+        <p><span>進步分數:</span> <span class="number">${data[14]}</span></p>
+        <img src="${imageUrl}" alt="成績組距" style="max-width: 100%;">
+    `;
+}
+
     </script>
 </body>
 </html>
