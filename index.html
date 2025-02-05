@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>段考成績查詢</title>
+    <style>
+        body {
+            font-family: "DFKai-SB", Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 3.0em;
+            color: #007BFF;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-family: "Microsoft JhengHei", Arial, sans-serif;
+            font-size: 1.3em;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 10px;
+            color: #555;
+        }
+
+        select, input[type="password"] {
+            font-family: "Microsoft JhengHei", Arial, sans-serif;
+            font-size: 1.2em;
+            font-weight: bold;
+            padding: 10px;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 300px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            font-family: "Microsoft JhengHei", Arial, sans-serif;
+            font-size: 1.3em;
+            font-weight: bold;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #5a5a5a;
+        }
+
+        #result {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            font-size: 1.3em;
+        }
+
+        #result p {
+            font-family: "Microsoft JhengHei", Arial, sans-serif;
+            font-weight: bold;
+            margin: 10px 0;
+            color: #008000;
+        }
+
+        #result p span.number {
+            font-family: "Times New Roman", serif;
+            color: #000;
+        }
+    </style>
+
+    <script>
+        console.log("🚀 JavaScript 已經開始執行！");  // ← 測試是否有執行
+        const SHEET_ID = '1i3x67udPJRqjJZ6NLeRVXhjIJ0Vcv54CXWNQTezL6S0';  // ⚠️ 這裡填入你的 Google 試算表 ID
+        const API_KEY = 'AIzaSyAI1Fr3Q_NthL7adXW9DUqO24pu7vQrpDc';  // ⚠️ 這裡填入你的 Google API 金鑰
+        const SHEET_NAME = '工作表1';  // 例如 'Sheet1'
+
+        // 取得試算表資料
+        async function fetchSheetData() {
+            const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}?key=${API_KEY}`;
+            const response = await fetch(url);
+            const data = await response.json();
+            return data.values;
+        }
+
+        // 初始化下拉選單
+        async function loadDropdownOptions() {
+            const data = await fetchSheetData();
+            const seatNumbers = [...new Set(data.slice(1).map(row => row[0]))];
+            const counts = [...new Set(data.slice(1).map(row => row[1]))];
+
+            const seatNumberSelect = document.getElementById('seatNumber');
+            const countSelect = document.getElementById('count');
+
+            seatNumberSelect.innerHTML = '';
+            countSelect.innerHTML = '';
+
+            seatNumbers.forEach(seat => {
+                const option = document.createElement('option');
+                option.value = seat;
+                option.textContent = seat;
+                seatNumberSelect.appendChild(option);
+            });
+
+            counts.forEach(count => {
+                const option = document.createElement('option');
+                option.value = count;
+                option.textContent = count;
+                countSelect.appendChild(option);
+            });
+        }
+
+        // 查詢成績
+        async function filterData() {
+            const seatNumber = document.getElementById('seatNumber').value;
+            const count = document.getElementById('count').value;
+            const password = document.getElementById('password').value;
+
+            const data = await fetchSheetData();
+            const filteredData = data.slice(1).find(row => row[0] === seatNumber && row[1] === count && row[2] === password);
+
+            const resultDiv = document.getElementById('result');
+            if (filteredData) {
+                resultDiv.innerHTML = `
+                    <p><span>座號:</span> <span class="number">${filteredData[3]}</span></p>
+                    <p><span>姓名:</span> <span class="chinese">${filteredData[4]}</span></p>
+                    <p><span>國文:</span> <span class="number">${filteredData[5]}</span></p>
+                    <p><span>英文:</span> <span class="number">${filteredData[6]}</span></p>
+                    <p><span>數學:</span> <span class="number">${filteredData[7]}</span></p>
+                    <p><span>自然:</span> <span class="number">${filteredData[8]}</span></p>
+                    <p><span>社會:</span> <span class="number">${filteredData[9]}</span></p>
+                    <p><span>總分:</span> <span class="number">${filteredData[10]}</span></p>
+                    <p><span>平均:</span> <span class="number">${filteredData[11]}</span></p>
+                    <p><span>排名:</span> <span class="number">${filteredData[12]}</span></p>
+                    <p><span>上次排名:</span> <span class="number">${filteredData[13]}</span></p>
+                    <p><span>進步分數:</span> <span class="number">${filteredData[14]}</span></p>
+                    <img src="${filteredData[15]}" alt="成績圖片" style="max-width: 100%;">
+                `;
+            } else {
+                resultDiv.innerHTML = '<p style="color:red;">查無符合條件的資料。</p>';
+            }
+        }
+
+        window.onload = loadDropdownOptions;
+    </script>
+</head>
+
+<body>
+    <h1>段考成績查詢系統</h1>
+    <label for="seatNumber">座號及姓名:</label>
+    <select id="seatNumber"></select>
+    <br>
+    <label for="count">次數:</label>
+    <select id="count"></select>
+    <br>
+    <label for="password">密碼:</label>
+    <input type="password" id="password">
+    <br>
+    <button onclick="filterData()">查詢</button>
+    <div id="result"></div>
+</body>
+
+</html>
