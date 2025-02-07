@@ -83,7 +83,7 @@
 </head>
 
 <body>
-    <h1>段考成績查詢系統</h1>
+    <h1>段考成績查詢</h1>
     <label for="seatNumber">座號及姓名:</label>
     <select id="seatNumber"></select>
     <br>
@@ -129,7 +129,7 @@
     if (filteredData) {
         displayData(filteredData);
     } else {
-        document.getElementById('result').innerHTML = '<p style="color:red;">查無符合條件的資料。</p>';
+        document.getElementById('result').innerHTML = '<p style="color:red;">查無符合條件的資料，請重新輸入!</p>';
     }
 }
 
@@ -144,7 +144,7 @@
             const seatNumberSelect = document.getElementById('seatNumber');
             const countSelect = document.getElementById('count');
 
-            seatNumberSelect.innerHTML = '<option value="" disabled selected>請選擇座號及姓名</option>';
+            seatNumberSelect.innerHTML = '<option value="" disabled selected>請選擇</option>';
             countSelect.innerHTML = '<option value="" disabled selected>請選擇次數</option>';
 
             seatNumbers.forEach(seat => {
@@ -193,7 +193,8 @@
         <p><span>排名:</span> <span class="number">${data[12]}</span></p>
         <p><span>上次排名:</span> <span class="number">${data[13]}</span></p>
         <p><span>進步分數:</span> <span class="number">${data[14]}</span></p>
-        <img src="${imageUrl}" alt="成績組距" style="max-width: 100%;">
+	<p><span>各科成績組距:</span> <span class="number">${data[15]}</span></p>
+        <img src="${imageUrl}" alt="各科成績組距" style="max-width: 100%;">
     `;
 }
 
