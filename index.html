@@ -93,7 +93,9 @@
     <label for="password">密碼:(預設身分證末四碼)</label>
     <input type="password" id="password">
     <br>
-    <button onclick="filterData()">查詢</button>
+    <button onclick="filterData()">送出查詢</button>
+    <!-- 新增的按鈕 -->
+    <button onclick="clearForm()">清除重填</button>
     <div id="result"></div>
 
     <script>
@@ -197,7 +199,10 @@
         <img src="${imageUrl}" alt="各科成績組距" style="max-width: 100%;">
     `;
 }
-
+	 function clearForm() {
+        document.getElementById('password').value = "";
+        document.getElementById('result').innerHTML = ""; // 清空結果顯示
+    }
     </script>
 </body>
 </html>
